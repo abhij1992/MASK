@@ -1,14 +1,24 @@
 library(twitteR)
-consumer_key   <- "uhlGuejAGkwE9rQVEwJVoWMlG"
-consumer_secret<- "iI9jVlCwntyfJe5YnAF3qFSDhimfgajWTAA0kK9Qp3nAFsQuf9"
-setup_twitter_oauth(consumer_key = consumer_key,consumer_secret = consumer_secret,access_token = NULL, access_secret = NULL)
+library(plyr)
+library(stringr)
+
+args <- commandArgs(TRUE)
+keyword <- args[1]
+
+consumer_key   <- "FauyFIvYxY0AWMZL6zZxyQI65" #replace with your consumer_key
+consumer_secret<- "JhDIkfHGbrTYB0r2LItaylcQjlyXbBGsMK5AERSQZNEAzvshxE" #replace with your consumer_key_secret
+token <- "2549385872-6fhI4fBQkFrQnM2KMlBMqvvbZtuBl1HUVC59bj4" #Token_key
+token_secret <- "fjGlm1jpSGivReoFQKw7LNG2RTDsOI3NROj0xZZD9ek9K" #Token_access_key 
+
+#token and token secret values required to run this script without error
+setup_twitter_oauth(consumer_key = consumer_key,consumer_secret = consumer_secret,access_token = token, access_secret = token_secret)
 
 
 
 score.sentiment = function(sentences, pos.words, neg.words, .progress='none')
 {
-  require(plyr)
-  require(stringr)
+  #require(plyr)
+  #require(stringr)
   # we got a vector of sentences. plyr will handle a list
   # or a vector as an "l" for us
   # we want a simple array ("a") of scores back, so we use
@@ -48,24 +58,23 @@ score.sentiment = function(sentences, pos.words, neg.words, .progress='none')
   return(scores.df)
 }
 
-<<<<<<< HEAD
-tweets <- searchTwitter("#gameofthrones", n=1000, lang="en")
-=======
-tweets <- searchTwitter("#GOT", n=100, lang="en")
->>>>>>> origin/master
+tweets <- searchTwitter(keyword, n=100, lang="en")
 #we have to extract their text and save it into the variable tweets.text by typing:
 Tweets.text = lapply(tweets,function(t)t$getText())
 
-pos = scan('D:/wamp/www/MASK/R Scripts/positive-words.txt', what='character', comment.char=';')
-neg = scan('D:/wamp/www/MASK/R Scripts/negative-words.txt', what='character', comment.char=';')
+pos = scan('D:/wamp/www/MASK/Web-Mask/positive-words.txt', what='character', comment.char=';')
+neg = scan('D:/wamp/www/MASK/Web-Mask/negative-words.txt', what='character', comment.char=';')
 
 
 
 analysis = score.sentiment(Tweets.text, pos, neg)
 
+Tweets.text
 
+print("table")
 table(analysis$score)
 
+print("Mean")
 mean(analysis$score)
 
-hist(analysis$score)
+#hist(analysis$score)
