@@ -1,3 +1,13 @@
+library(twitteR)
+consumer_key   <- "FauyFIvYxY0AWMZL6zZxyQI65"
+consumer_secret<- "JhDIkfHGbrTYB0r2LItaylcQjlyXbBGsMK5AERSQZNEAzvshxE"
+token <- "2549385872-6fhI4fBQkFrQnM2KMlBMqvvbZtuBl1HUVC59bj4" # From dev.twitter.com
+token_secret <- "fjGlm1jpSGivReoFQKw7LNG2RTDsOI3NROj0xZZD9ek9K" # From dev.twitter.com
+setup_twitter_oauth(consumer_key = consumer_key,consumer_secret = consumer_secret,token, token_secret)
+
+tweets <- searchTwitter("#samsung", n=1000, lang="en")
+Tweets.text = lapply(tweets,function(t)t$getText())
+
 #install.packages (c ( "tm", "wordcloud"))
 library (tm)
 library (wordcloud)

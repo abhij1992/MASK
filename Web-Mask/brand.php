@@ -1,8 +1,9 @@
 <?php
 
-if(isset($_POST['keyword'])){
-	$keyword=$_POST['keyword'];
-	$output = shell_exec("D:\Windows_Program_Files\R-3.2.2\bin\\rscript.exe sentiment.R $keyword 2>&1");//supply path to your Rscript.exe file
+if(isset($_POST['brand1']) && isset($_POST['brand2'])){
+	$brand1=$_POST['brand1'];
+	$brand2=$_POST['brand2'];
+	$output = shell_exec("D:\Windows_Program_Files\R-3.2.2\bin\\rscript.exe brand.R $brand1 $brand2 2>&1");//supply path to your Rscript.exe file
 	echo "Result contains ";
     echo "<pre>$output</pre>";
 }
@@ -21,12 +22,12 @@ if(isset($_GET['N']))
 
 <html>
 <body>
-<form name="analysis" method="post" action="">
-<b>Enter the Keyword to generate analysis report</b></br>
-<input type="text" name="keyword"/>
+<form name="brand" method="post" action="">
+<b>Enter the 2 brands names to compare and generate analysis report</b></br>
+<input type="text" name="brand1"/>
+<input type="text" name="brand2"/>
 <input type="submit" value="generate"/>
 <input type="reset" value="clear">
 </form>
-<a href="brand.php">Brand Comparision</a>
 </body>
 </html>
