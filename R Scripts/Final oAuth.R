@@ -48,11 +48,8 @@ score.sentiment = function(sentences, pos.words, neg.words, .progress='none')
   return(scores.df)
 }
 
-<<<<<<< HEAD
-tweets <- searchTwitter("#gameofthrones", n=1000, lang="en")
-=======
+
 tweets <- searchTwitter("#GOT", n=100, lang="en")
->>>>>>> origin/master
 #we have to extract their text and save it into the variable tweets.text by typing:
 Tweets.text = lapply(tweets,function(t)t$getText())
 

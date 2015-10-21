@@ -3,7 +3,7 @@
 if(isset($_POST['brand1']) && isset($_POST['brand2'])){
 	$brand1=$_POST['brand1'];
 	$brand2=$_POST['brand2'];
-	$output = shell_exec("D:\Windows_Program_Files\R-3.2.2\bin\\rscript.exe brand.R $brand1 $brand2 2>&1");//supply path to your Rscript.exe file
+	$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe brand.R $brand1 $brand2 2>&1");//supply path to your Rscript.exe file
 	echo "Result contains ";
     echo "<pre>$output</pre>";
 }
@@ -12,7 +12,7 @@ if(isset($_GET['N']))
 {
   $N = $_GET['N'];
   echo "<h1>$N</h1>";
-  $output = shell_exec("D:\Windows_Program_Files\R-3.2.2\bin\\rscript.exe script.R $N 2>&1");//supply path to your Rscript.exe file
+  $output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe script.R $N 2>&1");//supply path to your Rscript.exe file
   echo "Result contains ";
   echo "<pre>$output</pre>";
   echo "</br>";
