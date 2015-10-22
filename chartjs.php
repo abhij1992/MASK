@@ -1,6 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+<?php 
+session_start();
+$pluname="";
+include 'connection.php'; 
 
+function myFilter($var){
+  return ($var !== NULL && $var !== FALSE && $var !== '');
+}
+
+if(isset($_POST['hashtag']))
+{
+	$keyword=$_POST['hashtag'];
+	$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
+	//echo "Result contains ";
+    //echo "<pre>$output</pre>";	
+	$table=get_string_between($output,"table-start","table-end");
+	//echo "<pre>$table</pre>";
+	$values = explode("\n",$table);
+	//echo "X axis = ".$values[1]." \n Y axis = ".$values[2]."";
+}
+?>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <!-- Meta, title, CSS, favicons, etc. -->
@@ -8,7 +28,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Gentallela Alela! | </title>
+    <title>Home</title>
 
     <!-- Bootstrap core CSS -->
 
@@ -23,6 +43,7 @@
 
 
     <script src="js/jquery.min.js"></script>
+	<script src="js/chartjs/chart.min.js"></script> <!--Include chart.js file-->
 
     <!--[if lt IE 9]>
         <script src="../assets/js/ie8-responsive-file-warning.js"></script>
@@ -34,14 +55,58 @@
           <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
 
+	<script>
+	//chart related code block
+	window.onload = draw; // try to draw the chart after pages load if data give or else does nothing
+	var data = {
+	<?php
+	
+	$x = explode(" ",$values[1]);
+	$x=array_filter($x,'myFilter');
+	echo "labels:[";
+	$i=0;
+	foreach($x as $k=>$v){
+		//if(!empty($v) || $v==0) {
+		echo $v;
+		$i++;
+		if($i<count($x)) echo ",";
+		
+	}
+	echo "],"; ?>
+    datasets: [
+        {
+            label: "Dataset",
+            fillColor: "#<?php echo substr(md5(rand()), 0, 6);?>",
+            strokeColor: "rgba(151,187,205,0.8)",
+            highlightFill: "rgba(151,187,205,0.75)",
+            highlightStroke: "rgba(151,187,205,1)",
+            data: [
+			<?php
+				$x = explode(" ",$values[2]);
+				$x=array_filter($x,'myFilter');
+				$i=0;
+				foreach($x as $k=>$v){
+				if(!empty($v)) {
+				echo $v;
+				$i++;
+				if($i<count($x)) echo ",";
+				}
+			}
+			?>
+			]
+        }
+			  ]
+	};
+	function draw(){
+	alert("drawing graph!");
+	var ctx = document.getElementById("myChart").getContext("2d");
+	var myBarChart = new Chart(ctx).Bar(data);
+	}
+
+	</script>
 </head>
 
-<?php 
-session_start();
-$pluname="";
-include 'connection.php'; 
 
-?>
 <body class="nav-md">
 
     <div class="container body">
@@ -285,17 +350,25 @@ include 'connection.php';
                                     <div class="clearfix"></div>
                                 </div>
                                 <div class="x_content">
+											<form name="sentiment" action="" method="post" >
                                             <div class="col-md-12 col-sm-6 col-xs-12">
-                                                <input type="text" id="first-name" required="required" class="form-control col-md-7 col-xs-12">
+                                                <input type="text" id="tag" name="hashtag" required="required" class="form-control col-md-7 col-xs-12">
                                             </div>
 											<div class="ln_solid"></div>
 											<div class="form-group">
                                             <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+											
+
                                                 <button type="submit" class="btn btn-primary">Cancel</button>
                                                 <button type="submit" class="btn btn-success">Submit</button>
+												
                                             </div>
                                         </div>
+										</form>
+										<canvas id="myChart" align="center" width="400" height="400"></canvas>
                                 </div>
+								
+									
                             </div>
                         </div>
 
@@ -346,6 +419,7 @@ include 'connection.php';
         };
 
     </script>
+	
 </body>
 
 </html>
