@@ -45,7 +45,12 @@ Matrix <- TermDocumentMatrix(myCorpus) # terms in rows
 DTM <- DocumentTermMatrix(myCorpus) # document no's in rows
 m <- as.matrix(DTM)
 v <- sort(colSums(m),decreasing=TRUE)
+cat("table-start")
 head(v,14)
+cat("table-end\n")
 words <- names(v)
 d <- data.frame(word=words, freq=v)
+
+png("myplot.png", width=4, height=4, units="in", res=300)
 wordcloud(d$word,d$freq,min.freq=50)
+dev.off() #only 129kb in size

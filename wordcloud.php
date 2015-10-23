@@ -13,12 +13,12 @@ if(isset($_POST['hashtag']))
 {
 	$keyword=$_POST['hashtag'];
 	//$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
-	$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
-	//echo "Result contains ";
-    //echo "<pre>$output</pre>";	
+	$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
+	echo "Result contains ";
+    // echo "<pre>$output</pre>";	
 	$table=get_string_between($output,"table-start","table-end");
 	//echo "<pre>$table</pre>";
-	$values = explode("\n",$table);
+	//$values = explode("\n",$table);
 	//echo "X axis = ".$values[1]." \n Y axis = ".$values[2]."";
 }
 ?>
@@ -56,55 +56,7 @@ if(isset($_POST['hashtag']))
           <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
 
-	<script>
-	//chart related code block
-	window.onload = draw; // try to draw the chart after pages load if data give or else does nothing
-	var data = {
-	<?php
 	
-	$x = explode(" ",$values[1]);
-	$x=array_filter($x,'myFilter');
-	echo "labels:[";
-	$i=0;
-	foreach($x as $k=>$v){
-		//if(!empty($v) || $v==0) {
-		echo $v;
-		$i++;
-		if($i<count($x)) echo ",";
-		
-	}
-	echo "],"; ?>
-    datasets: [
-        {
-            label: "Dataset",
-            fillColor: "#<?php echo substr(md5(rand()), 0, 6);?>",
-            strokeColor: "rgba(151,187,205,0.8)",
-            highlightFill: "rgba(151,187,205,0.75)",
-            highlightStroke: "rgba(151,187,205,1)",
-            data: [
-			<?php
-				$x = explode(" ",$values[2]);
-				$x=array_filter($x,'myFilter');
-				$i=0;
-				foreach($x as $k=>$v){
-				if(!empty($v)) {
-				echo $v;
-				$i++;
-				if($i<count($x)) echo ",";
-				}
-			}
-			?>
-			]
-        }
-			  ]
-	};
-	function draw(){
-	alert("drawing graph!");
-	var ctx = document.getElementById("myChart").getContext("2d");
-	var myBarChart = new Chart(ctx).Bar(data);
-	}
-
-	</script>
 </head>
 
 
@@ -356,7 +308,9 @@ if(isset($_POST['hashtag']))
                                                 <input type="text" id="tag" name="hashtag" required="required" class="form-control col-md-7 col-xs-12">
                                             </div>
 											<div class="ln_solid"></div>
-											<div class="form-group">
+											
+                                            <div class="form-group">
+											 <div class="ln_solid"></div>
                                             <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
 											
 
@@ -364,16 +318,57 @@ if(isset($_POST['hashtag']))
                                                 <button type="submit" class="btn btn-success">Submit</button>
 												
                                             </div>
+											
+												
+											
                                         </div>
 										</form>
-										<canvas id="myChart" align="center" width="400" height="400"></canvas>
+										
                                 </div>
+
 								
 									
                             </div>
                         </div>
+						
+						
+						
+						
+				<?php if(isset($_POST['hashtag']))
+						{
+				?>
+						<div class="col-md-12 col-sm-12 col-xs-12">
+                            <div class="x_panel">
+                                <div class="x_title">
+                                    <h2>Word Cloud <small>Associated words</small></h2>
+                                    <ul class="nav navbar-right panel_toolbox">
+                                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                        </li>
+                                       
+                                        <li><a class="close-link"><i class="fa fa-close"></i></a>
+                                        </li>
+                                    </ul>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="x_content">
+                                    <br>
+                                    <img src="myplot.png" alt="Mountain View" style="width:700px;" align="center">
+									<div class="bs-example" data-example-id="simple-jumbotron">
+                                    <div class="jumbotron">
+                                        <h3>Word counts</h3>
+                                        <?php
+											echo "<pre>$table</pre>";
+										?>
+                                    </div>
+                                </div>
+									
+                                </div>
+                            </div>
+                        </div>
 
-                        
+                <?php
+						}
+				?>
 					
                     </div>
                 </div>
