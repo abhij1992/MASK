@@ -2,8 +2,6 @@ library(twitteR)
 library(plyr)
 library(stringr)
 
-print("THis is the first line,and should execute or we die")
-
 args <- commandArgs(TRUE)
 keyword <- args[1]
 
@@ -60,15 +58,12 @@ score.sentiment = function(sentences, pos.words, neg.words, .progress='none')
   return(scores.df)
 }
 
-tweets <- searchTwitter("india", n=100, lang="en")
+tweets <- searchTwitter(keyword, n=100, lang="en")
 #we have to extract their text and save it into the variable tweets.text by typing:
 Tweets.text = lapply(tweets,function(t)t$getText())
 
-#pos = scan('D:/wamp/www/MASK/Web-Mask/positive-words.txt', what='character', comment.char=';')
-#neg = scan('D:/wamp/www/MASK/Web-Mask/negative-words.txt', what='character', comment.char=';')
-
-pos = scan('C:/wamp/www/MASK/Web-Mask/positive-words.txt', what='character', comment.char=';')
-neg = scan('C:/wamp/www/MASK/Web-Mask/negative-words.txt', what='character', comment.char=';')
+pos = scan('D:/wamp/www/MASK/Web-Mask/positive-words.txt', what='character', comment.char=';')
+neg = scan('D:/wamp/www/MASK/Web-Mask/negative-words.txt', what='character', comment.char=';')
 
 
 
@@ -80,10 +75,10 @@ cat("table-start")
 print(table(analysis$score))
 cat("table-end\n")
 
-cat("this is working")
+
 
 cat("mean-start")
 mean(analysis$score)
 cat("mean-end")
 
-#hist(analysis$score) 
+#hist(analysis$score)
