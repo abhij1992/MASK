@@ -12,8 +12,8 @@ function myFilter($var){
 if(isset($_POST['hashtag']))
 {
 	$keyword=$_POST['hashtag'];
-	//$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
-	$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
+	$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
+	//$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
 	echo "Result contains ";
     // echo "<pre>$output</pre>";	
 	$table=get_string_between($output,"table-start","table-end");

@@ -3,20 +3,54 @@
 <?php 
 session_start();
 $pluname="";
-include 'connection.php'; 
+include 'connection.php';
 
 function myFilter($var){
   return ($var !== NULL && $var !== FALSE && $var !== '');
 }
 
-if(isset($_POST['hashtag']))
+function insertTable($table,$tag){
+	global $conn;
+	if ($conn->connect_error) { //Check connection
+		die("Connection failed: " . $conn->connect_error);
+	}
+	if(isset($_GET["is_fav"])){
+		$is_fav=1;
+	}
+	else $is_fav=0;
+	if($res=$conn->query("SELECT count(*) as entry from hashtags WHERE `tag`='".$tag."';")){
+		$row=$res->fetch_assoc();
+		if($row["entry"]=='0'){
+			if(!$conn->query("INSERT INTO hashtags(tag,date_time,graph_values,user_id,is_fav) VALUES('".$tag."','".date("Y-m-d H:i:s")."','".$table."','".$_SESSION["user_id"]."','".$is_fav."');")){
+				echo "Failed to insert";
+			}
+		}else{
+			if(!$conn->query("UPDATE hashtags set date_time='".date("Y-m-d H:i:s")."',graph_values='".$table."' WHERE tag='".$tag."';")){
+				echo "Failed to update";
+			}
+		}
+	}
+}
+function getTable($tag){
+	global $conn;
+	$sql="SELECT graph_values FROM hashtags WHERE tag='".$tag."';";
+	$res=$conn->query($sql);
+	$row=$res->fetch_assoc();
+	return $row["graph_values"];
+}
+if(isset($_GET['hashtag']))
 {
-	$keyword=$_POST['hashtag'];
-	//$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
-	$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
+	$keyword=$_GET['hashtag'];
+	$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
+	//$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
 	//echo "Result contains ";
     //echo "<pre>$output</pre>";	
 	$table=get_string_between($output,"table-start","table-end");
+	if(isset($_GET['compare']) && $_GET['compare']=='1'){
+		$previousTable=getTable($keyword);
+		$previousValues=explode("\n",$previousTable);
+	}
+	insertTable($table,$keyword);
 	//echo "<pre>$table</pre>";
 	$values = explode("\n",$table);
 	//echo "X axis = ".$values[1]." \n Y axis = ".$values[2]."";
@@ -59,6 +93,53 @@ if(isset($_POST['hashtag']))
 	<script>
 	//chart related code block
 	window.onload = draw; // try to draw the chart after pages load if data give or else does nothing
+	<?php
+	if(isset($_GET["compare"]) && $_GET["compare"]==1){
+	?>
+	var prevData={
+	<?php
+	
+	$x = explode(" ",$previousValues[1]);
+	$x=array_filter($x,'myFilter');
+	echo "labels:[";
+	$i=0;
+	foreach($x as $k=>$v){
+		//if(!empty($v) || $v==0) {
+		echo $v;
+		$i++;
+		if($i<count($x)) echo ",";
+		
+	}
+	echo "],"; ?>
+		
+	datasets: [
+        {
+            label: "Dataset",
+            fillColor: "#<?php echo substr(md5(rand()), 0, 6);?>",
+            strokeColor: "rgba(151,187,205,0.8)",
+            highlightFill: "rgba(151,187,205,0.75)",
+            highlightStroke: "rgba(151,187,205,1)",
+            data: [
+			<?php
+				$x = explode(" ",$previousValues[2]);
+				$x=array_filter($x,'myFilter');
+				$i=0;
+				foreach($x as $k=>$v){
+				if(!empty($v)) {
+				echo $v;
+				$i++;
+				if($i<count($x)) echo ",";
+				}
+			}
+			?>
+				]
+        }
+			  ]	
+	};
+	<?php
+	}
+	?>
+	
 	var data = {
 	<?php
 	
@@ -99,9 +180,17 @@ if(isset($_POST['hashtag']))
 			  ]
 	};
 	function draw(){
-	alert("drawing graph!");
+	//alert("drawing graph!");
 	var ctx = document.getElementById("myChart").getContext("2d");
 	var myBarChart = new Chart(ctx).Bar(data);
+	<?php
+	if(isset($_GET["compare"]) && $_GET["compare"]==1){
+	?>
+	var prevctx=document.getElementById("myPreviousChart").getContext("2d");
+	var myPrevBarChart= new Chart(prevctx).Bar(prevData);
+	<?php
+	}
+	?>
 	}
 
 	</script>
@@ -146,121 +235,34 @@ if(isset($_POST['hashtag']))
                             <h3>General</h3>
                             <ul class="nav side-menu">
                                 <li><a><i class="fa fa-home"></i> Home <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu" style="display: none">
-                                        <li><a href="index.html">Dashboard</a>
-                                        </li>
-                                        <li><a href="index2.html">Dashboard2</a>
-                                        </li>
-                                        <li><a href="index3.html">Dashboard3</a>
-                                        </li>
-                                    </ul>
+                                    
                                 </li>
-                                <li><a><i class="fa fa-edit"></i> Forms <span class="fa fa-chevron-down"></span></a>
+							<li><a><i class="fa fa-edit"></i> Previous Hashtags <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu" style="display: none">
-                                        <li><a href="form.html">General Form</a>
-                                        </li>
-                                        <li><a href="form_advanced.html">Advanced Components</a>
-                                        </li>
-                                        <li><a href="form_validation.html">Form Validation</a>
-                                        </li>
-                                        <li><a href="form_wizards.html">Form Wizard</a>
-                                        </li>
-                                        <li><a href="form_upload.html">Form Upload</a>
-                                        </li>
-                                        <li><a href="form_buttons.html">Form Buttons</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><a><i class="fa fa-desktop"></i> UI Elements <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu" style="display: none">
-                                        <li><a href="general_elements.html">General Elements</a>
-                                        </li>
-                                        <li><a href="media_gallery.html">Media Gallery</a>
-                                        </li>
-                                        <li><a href="typography.html">Typography</a>
-                                        </li>
-                                        <li><a href="icons.html">Icons</a>
-                                        </li>
-                                        <li><a href="glyphicons.html">Glyphicons</a>
-                                        </li>
-                                        <li><a href="widgets.html">Widgets</a>
-                                        </li>
-                                        <li><a href="invoice.html">Invoice</a>
-                                        </li>
-                                        <li><a href="inbox.html">Inbox</a>
-                                        </li>
-                                        <li><a href="calender.html">Calender</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><a><i class="fa fa-table"></i> Tables <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu" style="display: none">
-                                        <li><a href="tables.html">Tables</a>
-                                        </li>
-                                        <li><a href="tables_dynamic.html">Table Dynamic</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><a><i class="fa fa-bar-chart-o"></i> Data Presentation <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu" style="display: none">
-                                        <li><a href="chartjs.html">Chart JS</a>
-                                        </li>
-                                        <li><a href="chartjs2.html">Chart JS2</a>
-                                        </li>
-                                        <li><a href="morisjs.html">Moris JS</a>
-                                        </li>
-                                        <li><a href="echarts.html">ECharts </a>
-                                        </li>
-                                        <li><a href="other_charts.html">Other Charts </a>
-                                        </li>
+                                        <?php
+											$sql="SELECT tag from hashtags LIMIT 10;";
+											$res=$conn->query($sql);
+												while($row = $res->fetch_assoc())
+												{
+													echo "<li><a href='chartjs.php?hashtag=".$row["tag"]."&compare=1'>".$row["tag"]."</a></li>";
+												}
+		
+										?>
                                     </ul>
                                 </li>
                             </ul>
+							
                         </div>
                         <div class="menu_section">
-                            <h3>Live On</h3>
-                            <ul class="nav side-menu">
-                                <li><a><i class="fa fa-bug"></i> Additional Pages <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu" style="display: none">
-                                        <li><a href="e_commerce.html">E-commerce</a>
-                                        </li>
-                                        <li><a href="projects.html">Projects</a>
-                                        </li>
-                                        <li><a href="project_detail.html">Project Detail</a>
-                                        </li>
-                                        <li><a href="contacts.html">Contacts</a>
-                                        </li>
-                                        <li><a href="profile.html">Profile</a>
-                                        </li>
-                                        <li><a href="real_estate.html">Real Estate</a>
-                                        </li>
-
-                                    </ul>
-                                </li>
-                                <li><a><i class="fa fa-windows"></i> Extras <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu" style="display: none">
-                                        <li><a href="page_404.html">404 Error</a>
-                                        </li>
-                                        <li><a href="page_500.html">500 Error</a>
-                                        </li>
-                                        <li><a href="plain_page.html">Plain Page</a>
-                                        </li>
-                                        <li><a href="login.html">Login Page</a>
-                                        </li>
-                                        <li><a href="pricing_tables.html">Pricing Tables</a>
-                                        </li>
-
-                                    </ul>
-                                </li>
-                                <li><a><i class="fa fa-laptop"></i> Landing Page <span class="label label-success pull-right">Coming Soon</span></a>
-                                </li>
-                            </ul>
+							
+							
                         </div>
 
                     </div>
                     <!-- /sidebar menu -->
 
                     <!-- /menu footer buttons -->
+					<!--
                     <div class="sidebar-footer hidden-small">
                         <a data-toggle="tooltip" data-placement="top" title="Settings">
                             <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
@@ -275,6 +277,7 @@ if(isset($_POST['hashtag']))
                             <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
                         </a>
                     </div>
+					-->
                     <!-- /menu footer buttons -->
                 </div>
             </div>
@@ -351,9 +354,10 @@ if(isset($_POST['hashtag']))
                                     <div class="clearfix"></div>
                                 </div>
                                 <div class="x_content">
-											<form name="sentiment" action="" method="post" >
+											<form name="sentiment" action="" method="get">
                                             <div class="col-md-12 col-sm-6 col-xs-12">
-                                                <input type="text" id="tag" name="hashtag" required="required" class="form-control col-md-7 col-xs-12">
+                                                <input type="text" id="tag" name="hashtag" required="required" class="form-control col-md-7 col-xs-12"></br>
+												<input type ="checkbox" name="is_fav" value="1">Favorite tag</br>
                                             </div>
 											<div class="ln_solid"></div>
 											<div class="form-group">
@@ -366,23 +370,44 @@ if(isset($_POST['hashtag']))
                                             </div>
                                         </div>
 										</form>
+										
+										<?php
+											if(isset($_GET["compare"]) && $_GET["compare"]==1){
+										?>
+										<div>
+										<h3>Previous Sentimental Chart</h3>
+										
+										<canvas id="myPreviousChart" align="center" width="400" height="400"></canvas>
+										</div>
+										<?php
+											}
+										?>
+										<div 
+										<?php
+										if(isset($_GET["compare"]) && $_GET["compare"]==1){
+										 ?>
+										style="margin-left:500px;margin-top:-450px"
+										<?php
+										}
+										?>
+										>
+										<h3>Current Sentimental Chart</h3>
 										<canvas id="myChart" align="center" width="400" height="400"></canvas>
+										</div>
                                 </div>
 								
 									
                             </div>
                         </div>
 
-                        
-					
                     </div>
                 </div>
 
                 <!-- footer content -->
                 <footer>
                     <div class="">
-                        <p class="pull-right">Gentelella Alela! a Bootstrap 3 template by <a>Kimlabs</a>. |
-                            <span class="lead"> <i class="fa fa-paw"></i> Gentelella Alela!</span>
+                        <p class="pull-right">Market Analysis based on Social NetWorK
+                            <span class="lead"> <i class="fa fa-paw"></i> |MASK</span>
                         </p>
                     </div>
                     <div class="clearfix"></div>
