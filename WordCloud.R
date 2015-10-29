@@ -48,9 +48,13 @@ v <- sort(colSums(m),decreasing=TRUE)
 cat("table-start")
 head(v,14)
 cat("table-end\n")
+
+filename=paste("wordclouds/",format(Sys.time(), "%Y.%m.%d.%s"),".png",sep="")
 words <- names(v)
 d <- data.frame(word=words, freq=v)
-
-png("myplot.png", width=4, height=4, units="in", res=300)
-wordcloud(d$word,d$freq,min.freq=50)
+png(filename, width=4, height=4, units="in", res=300)
+wordcloud(d$word,d$freq,min.freq=10)
 dev.off() #only 129kb in size
+cat("filename-start")
+filename
+cat("filename-end\n")

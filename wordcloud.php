@@ -8,18 +8,44 @@ include 'connection.php';
 function myFilter($var){
   return ($var !== NULL && $var !== FALSE && $var !== '');
 }
+function insertTable($table,$tag){
+	global $conn;
+	if ($conn->connect_error) { //Check connection
+		die("Connection failed: " . $conn->connect_error);
+	}
+	if(isset($_POST["is_fav"])){
+		$is_fav=1;
+	}
+	else $is_fav=0;
 
+	if($res=$conn->query("SELECT count(*) as entry from word_cloud WHERE `tag`='".$tag."';")){
+		$row=$res->fetch_assoc();
+		if($row["entry"]=='0'){
+			if(!$conn->query("INSERT INTO word_cloud(tag,date_time,source_location,user_id,is_fav) VALUES('".$tag."','".date("Y-m-d H:i:s")."','".$table."','".$_SESSION["user_id"]."','".$is_fav."');")){
+				echo "Failed to insert";
+			}
+		}else{
+			if(!$conn->query("UPDATE word_cloud set date_time='".date("Y-m-d H:i:s")."',source_location='".$table."',is_fav=".$is_fav." WHERE tag='".$tag."';")){
+				echo "Failed to update";
+			}
+		}
+	}
+}
 if(isset($_POST['hashtag']))
 {
 	$keyword=$_POST['hashtag'];
-	$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
-	//$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
-	echo "Result contains ";
+	//$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
+	$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
+	//echo "Result contains ";
     // echo "<pre>$output</pre>";	
 	$table=get_string_between($output,"table-start","table-end");
+	$filename=get_string_between($output,"filename-start","filename-end");
+	$filename = substr($filename, 5, -2);
 	//echo "<pre>$table</pre>";
 	//$values = explode("\n",$table);
 	//echo "X axis = ".$values[1]." \n Y axis = ".$values[2]."";
+	//echo $filename;
+	insertTable($filename,$keyword);
 }
 ?>
 <head>
@@ -97,118 +123,36 @@ if(isset($_POST['hashtag']))
 						
                             <h3>General</h3>
                             <ul class="nav side-menu">
-                                <li><a><i class="fa fa-home"></i> Home <span class="fa fa-chevron-down"></span></a>
+                                <li><a href="wordcloud.php"><i class="fa fa-home"></i> Word Cloud </a>
+                                </li>
+                                <li><a><i class="fa fa-edit"></i> Word Cloud searches <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu" style="display: none">
-                                        <li><a href="index.html">Dashboard</a>
-                                        </li>
-                                        <li><a href="index2.html">Dashboard2</a>
-                                        </li>
-                                        <li><a href="index3.html">Dashboard3</a>
-                                        </li>
+                                        <?php
+											$sql="SELECT tag from word_cloud LIMIT 10;";
+											$res=$conn->query($sql);
+												while($row = $res->fetch_assoc())
+												{
+													echo "<li><a href='word_cloud_past.php?hashtag=".$row["tag"]."'>".$row["tag"]."</a></li>";
+												}
+		
+										?>
                                     </ul>
                                 </li>
-                                <li><a><i class="fa fa-edit"></i> Forms <span class="fa fa-chevron-down"></span></a>
+								<li><a><i class="fa fa-edit"></i> Favourite   <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu" style="display: none">
-                                        <li><a href="form.html">General Form</a>
-                                        </li>
-                                        <li><a href="form_advanced.html">Advanced Components</a>
-                                        </li>
-                                        <li><a href="form_validation.html">Form Validation</a>
-                                        </li>
-                                        <li><a href="form_wizards.html">Form Wizard</a>
-                                        </li>
-                                        <li><a href="form_upload.html">Form Upload</a>
-                                        </li>
-                                        <li><a href="form_buttons.html">Form Buttons</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><a><i class="fa fa-desktop"></i> UI Elements <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu" style="display: none">
-                                        <li><a href="general_elements.html">General Elements</a>
-                                        </li>
-                                        <li><a href="media_gallery.html">Media Gallery</a>
-                                        </li>
-                                        <li><a href="typography.html">Typography</a>
-                                        </li>
-                                        <li><a href="icons.html">Icons</a>
-                                        </li>
-                                        <li><a href="glyphicons.html">Glyphicons</a>
-                                        </li>
-                                        <li><a href="widgets.html">Widgets</a>
-                                        </li>
-                                        <li><a href="invoice.html">Invoice</a>
-                                        </li>
-                                        <li><a href="inbox.html">Inbox</a>
-                                        </li>
-                                        <li><a href="calender.html">Calender</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><a><i class="fa fa-table"></i> Tables <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu" style="display: none">
-                                        <li><a href="tables.html">Tables</a>
-                                        </li>
-                                        <li><a href="tables_dynamic.html">Table Dynamic</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li><a><i class="fa fa-bar-chart-o"></i> Data Presentation <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu" style="display: none">
-                                        <li><a href="chartjs.html">Chart JS</a>
-                                        </li>
-                                        <li><a href="chartjs2.html">Chart JS2</a>
-                                        </li>
-                                        <li><a href="morisjs.html">Moris JS</a>
-                                        </li>
-                                        <li><a href="echarts.html">ECharts </a>
-                                        </li>
-                                        <li><a href="other_charts.html">Other Charts </a>
-                                        </li>
+                                        <?php
+											$sql="SELECT tag from word_cloud where is_fav=1;";
+											$res=$conn->query($sql);
+												while($row = $res->fetch_assoc())
+												{
+													echo "<li><a href='word_cloud_past.php?hashtag=".$row["tag"]."'>".$row["tag"]."</a></li>";
+												}
+		
+										?>
                                     </ul>
                                 </li>
                             </ul>
                         </div>
-                        <div class="menu_section">
-                            <h3>Live On</h3>
-                            <ul class="nav side-menu">
-                                <li><a><i class="fa fa-bug"></i> Additional Pages <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu" style="display: none">
-                                        <li><a href="e_commerce.html">E-commerce</a>
-                                        </li>
-                                        <li><a href="projects.html">Projects</a>
-                                        </li>
-                                        <li><a href="project_detail.html">Project Detail</a>
-                                        </li>
-                                        <li><a href="contacts.html">Contacts</a>
-                                        </li>
-                                        <li><a href="profile.html">Profile</a>
-                                        </li>
-                                        <li><a href="real_estate.html">Real Estate</a>
-                                        </li>
-
-                                    </ul>
-                                </li>
-                                <li><a><i class="fa fa-windows"></i> Extras <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu" style="display: none">
-                                        <li><a href="page_404.html">404 Error</a>
-                                        </li>
-                                        <li><a href="page_500.html">500 Error</a>
-                                        </li>
-                                        <li><a href="plain_page.html">Plain Page</a>
-                                        </li>
-                                        <li><a href="login.html">Login Page</a>
-                                        </li>
-                                        <li><a href="pricing_tables.html">Pricing Tables</a>
-                                        </li>
-
-                                    </ul>
-                                </li>
-                                <li><a><i class="fa fa-laptop"></i> Landing Page <span class="label label-success pull-right">Coming Soon</span></a>
-                                </li>
-                            </ul>
-                        </div>
-
                     </div>
                     <!-- /sidebar menu -->
 
@@ -306,6 +250,7 @@ if(isset($_POST['hashtag']))
 											<form name="sentiment" action="" method="post" >
                                             <div class="col-md-12 col-sm-6 col-xs-12">
                                                 <input type="text" id="tag" name="hashtag" required="required" class="form-control col-md-7 col-xs-12">
+												<input type ="checkbox" name="is_fav" value="1">Favorite tag</br>
                                             </div>
 											<div class="ln_solid"></div>
 											
@@ -352,7 +297,7 @@ if(isset($_POST['hashtag']))
                                 </div>
                                 <div class="x_content">
                                     <br>
-                                    <img src="myplot.png" alt="Mountain View" style="width:700px;" align="center">
+                                    <img src="<?php echo $filename; ?>" alt="Mountain View" style="width:700px;" align="center">
 									<div class="bs-example" data-example-id="simple-jumbotron">
                                     <div class="jumbotron">
                                         <h3>Word counts</h3>
