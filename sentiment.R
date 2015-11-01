@@ -52,6 +52,14 @@ score.sentiment = function(sentences, pos.words, neg.words, .progress='none')
     neg.matches = !is.na(neg.matches)
     # and conveniently enough, TRUE/FALSE will be treated as 1/0 by sum():
     score = sum(pos.matches) - sum(neg.matches)
+	if(score<0)
+    {
+      score=-1
+    }
+    if(score>0)
+    {
+      score=1
+    }
     return(score)
   }, pos.words, neg.words, .progress=.progress )
   scores.df = data.frame(score=scores, text=sentences)
