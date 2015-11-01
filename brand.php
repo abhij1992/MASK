@@ -3,49 +3,28 @@
 <?php 
 session_start();
 $pluname="";
-include 'connection.php'; 
+include 'connection.php';
 
 function myFilter($var){
   return ($var !== NULL && $var !== FALSE && $var !== '');
 }
-function insertTable($table,$tag){
-	global $conn;
-	if ($conn->connect_error) { //Check connection
-		die("Connection failed: " . $conn->connect_error);
-	}
-	if(isset($_POST["is_fav"])){
-		$is_fav=1;
-	}
-	else $is_fav=0;
 
-	if($res=$conn->query("SELECT count(*) as entry from word_cloud WHERE `tag`='".$tag."';")){
-		$row=$res->fetch_assoc();
-		if($row["entry"]=='0'){
-			if(!$conn->query("INSERT INTO word_cloud(tag,date_time,source_location,user_id,is_fav) VALUES('".$tag."','".date("Y-m-d H:i:s")."','".$table."','".$_SESSION["user_id"]."','".$is_fav."');")){
-				echo "Failed to insert";
-			}
-		}else{
-			if(!$conn->query("UPDATE word_cloud set date_time='".date("Y-m-d H:i:s")."',source_location='".$table."',is_fav=".$is_fav." WHERE tag='".$tag."';")){
-				echo "Failed to update";
-			}
-		}
-	}
-}
-if(isset($_POST['hashtag']))
+if(isset($_POST['brand1']) && isset($_POST['brand2']))
 {
-	$keyword=$_POST['hashtag'];
-	$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
-	//$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
+	$brand1=$_POST['brand1'];
+	$brand2=$_POST['brand2'];
+	$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe brand.R $brand1 $brand2");//supply path to your Rscript.exe file
+	//$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe brand.R $brand1 $brand2");//supply path to your Rscript.exe file
 	//echo "Result contains ";
-    // echo "<pre>$output</pre>";	
-	$table=get_string_between($output,"table-start","table-end");
-	$filename=get_string_between($output,"filename-start","filename-end");
-	$filename = substr($filename, 5, -2);
+    //echo "<pre>$output</pre>";	
+	$table=get_string_between($output,"brand1-start","brand1-end");
 	//echo "<pre>$table</pre>";
-	//$values = explode("\n",$table);
-	//echo "X axis = ".$values[1]." \n Y axis = ".$values[2]."";
-	//echo $filename;
-	insertTable($filename,$keyword);
+	$brand1values = explode("\n",$table);
+	//echo "Brand 1 X axis = ".$brand1values[1]." \n Y axis = ".$brand1values[2]."";
+	$table=get_string_between($output,"brand2-start","brand2-end");
+	//echo "<pre>$table</pre>";
+	$brand2values = explode("\n",$table);
+	//echo "Brand 2 X axis = ".$brand2values[1]." \n Y axis = ".$brand2values[2]."";	
 }
 ?>
 <head>
@@ -72,17 +51,97 @@ if(isset($_POST['hashtag']))
     <script src="js/jquery.min.js"></script>
 	<script src="js/chartjs/chart.min.js"></script> <!--Include chart.js file-->
 
-    <!--[if lt IE 9]>
-        <script src="../assets/js/ie8-responsive-file-warning.js"></script>
-        <![endif]-->
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-          <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-          <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-        <![endif]-->
-
+   <script>
+	//chart related code block
+	window.onload = draw; 
+	var aData={
+	<?php
 	
+	$x = explode(" ",$brand1values[1]);
+	$x=array_filter($x,'myFilter');
+	echo "labels:[";
+	$i=0;
+	foreach($x as $k=>$v){
+		//if(!empty($v) || $v==0) {
+		echo $v;
+		$i++;
+		if($i<count($x)) echo ",";
+	}
+	echo "],"; ?>
+		
+	datasets: [
+        {
+            label: "Dataset",
+            fillColor: "#<?php echo substr(md5(rand()), 0, 6);?>",
+            strokeColor: "rgba(151,187,205,0.8)",
+            highlightFill: "rgba(151,187,205,0.75)",
+            highlightStroke: "rgba(151,187,205,1)",
+            data: [
+			<?php
+				$x = explode(" ",$brand1values[2]);
+				$x=array_filter($x,'myFilter');
+				$i=0;
+				foreach($x as $k=>$v){
+				if(!empty($v)) {
+				echo $v;
+				$i++;
+				if($i<count($x)) echo ",";
+				}
+			}
+			?>
+				]
+        }
+			  ]	
+	};
+	
+	var bData = {
+	<?php
+	
+	$x = explode(" ",$brand2values[1]);
+	$x=array_filter($x,'myFilter');
+	echo "labels:[";
+	$i=0;
+	foreach($x as $k=>$v){
+		//if(!empty($v) || $v==0) {
+		echo $v;
+		$i++;
+		if($i<count($x)) echo ",";
+		
+	}
+	echo "],"; ?>
+    datasets: [
+        {
+            label: "Dataset",
+            fillColor: "#<?php echo substr(md5(rand()), 0, 6);?>",
+            strokeColor: "rgba(151,187,205,0.8)",
+            highlightFill: "rgba(151,187,205,0.75)",
+            highlightStroke: "rgba(151,187,205,1)",
+            data: [
+			<?php
+				$x = explode(" ",$brand2values[2]);
+				$x=array_filter($x,'myFilter');
+				$i=0;
+				foreach($x as $k=>$v){
+				if(!empty($v)) {
+				echo $v;
+				$i++;
+				if($i<count($x)) echo ",";
+				}
+			}
+			?>
+			]
+        }
+			  ]
+	};
+	function draw(){
+	//alert("drawing graph!");
+	var actx=document.getElementById("brandA").getContext("2d");
+	var myaBarChart= new Chart(actx).Bar(aData);
+	var bctx = document.getElementById("brandB").getContext("2d");
+	var mybBarChart = new Chart(bctx).Bar(bData);
+	}
+
+	</script>
 </head>
 
 
@@ -123,40 +182,23 @@ if(isset($_POST['hashtag']))
 						
                             <h3>General</h3>
                             <ul class="nav side-menu">
-                                <li><a href="wordcloud.php"><i class="fa fa-home"></i> Word Cloud </a>
+                                <li><a href="chartjs.php"><i class="fa fa-home"></i> Home <span class="fa fa-chevron-down"></span></a>
+                                    
                                 </li>
-                                <li><a><i class="fa fa-edit"></i> Word Cloud searches <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu" style="display: none">
-                                        <?php
-											$sql="SELECT tag from word_cloud LIMIT 10;";
-											$res=$conn->query($sql);
-												while($row = $res->fetch_assoc())
-												{
-													echo "<li><a href='word_cloud_past.php?hashtag=".$row["tag"]."'>".$row["tag"]."</a></li>";
-												}
-		
-										?>
-                                    </ul>
-                                </li>
-								<li><a><i class="fa fa-edit"></i> Favourite   <span class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu" style="display: none">
-                                        <?php
-											$sql="SELECT tag from word_cloud where is_fav=1;";
-											$res=$conn->query($sql);
-												while($row = $res->fetch_assoc())
-												{
-													echo "<li><a href='word_cloud_past.php?hashtag=".$row["tag"]."'>".$row["tag"]."</a></li>";
-												}
-		
-										?>
-                                    </ul>
-                                </li>
+							
                             </ul>
+							
                         </div>
+                        <div class="menu_section">
+							
+							
+                        </div>
+
                     </div>
                     <!-- /sidebar menu -->
 
                     <!-- /menu footer buttons -->
+					<!--
                     <div class="sidebar-footer hidden-small">
                         <a data-toggle="tooltip" data-placement="top" title="Settings">
                             <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
@@ -171,6 +213,7 @@ if(isset($_POST['hashtag']))
                             <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
                         </a>
                     </div>
+					-->
                     <!-- /menu footer buttons -->
                 </div>
             </div>
@@ -217,7 +260,7 @@ if(isset($_POST['hashtag']))
                     <div class="page-title">
                         <div class="title_left">
                             <h3>
-                    Enter a Hashtag
+                    Enter Brand names to compare
                     <small>
                         Do not include '#'
                     </small>
@@ -247,82 +290,57 @@ if(isset($_POST['hashtag']))
                                     <div class="clearfix"></div>
                                 </div>
                                 <div class="x_content">
-											<form name="sentiment" action="" method="post" >
+											<form name="brandcomparision" action="" method="post">
                                             <div class="col-md-12 col-sm-6 col-xs-12">
-                                                <input type="text" id="tag" name="hashtag" required="required" class="form-control col-md-7 col-xs-12">
-												<input type ="checkbox" name="is_fav" value="1">Favorite tag</br>
+												<b>Brand A:</b>
+                                                <input type="text" id="brand1" name="brand1" required="required" class="form-control col-md-7 col-xs-12"></br>
+												<b>Brand A:</b>
+												<input type="text" id="brand2" name="brand2" required="required" class="form-control col-md-7 col-xs-12"></br>
                                             </div>
 											<div class="ln_solid"></div>
-											
-                                            <div class="form-group">
-											 <div class="ln_solid"></div>
+											<div class="form-group">
                                             <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
-											
-
                                                 <button type="submit" class="btn btn-primary">Cancel</button>
                                                 <button type="submit" class="btn btn-success">Submit</button>
 												
                                             </div>
-											
-												
-											
                                         </div>
 										</form>
 										
+										<div>
+										<?php
+										if(isset($_POST['brand1'])){
+											echo "<h3>".$_POST['brand1']."</h3>";
+										?>
+										<canvas id="brandA" align="center" width="400" height="400"></canvas>
+										<?php 
+										}
+										?>
+										</div>
+										<div style="margin-left:500px;margin-top:-450px">
+										<?php
+										if(isset($_POST['brand2'])){
+											echo "<h3>".$_POST['brand2']."</h3>";
+										?>
+										<canvas id="brandB" align="center" width="400" height="400"></canvas>
+										<?php 
+										}
+										?>
+										</div>
                                 </div>
-
 								
 									
                             </div>
                         </div>
-						
-						
-						
-						
-				<?php if(isset($_POST['hashtag']))
-						{
-				?>
-						<div class="col-md-12 col-sm-12 col-xs-12">
-                            <div class="x_panel">
-                                <div class="x_title">
-                                    <h2>Word Cloud <small>Associated words</small></h2>
-                                    <ul class="nav navbar-right panel_toolbox">
-                                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                                        </li>
-                                       
-                                        <li><a class="close-link"><i class="fa fa-close"></i></a>
-                                        </li>
-                                    </ul>
-                                    <div class="clearfix"></div>
-                                </div>
-                                <div class="x_content">
-                                    <br>
-                                    <img src="<?php echo $filename; ?>" alt="Mountain View" style="width:700px;" align="center">
-									<div class="bs-example" data-example-id="simple-jumbotron">
-                                    <div class="jumbotron">
-                                        <h3>Word counts</h3>
-                                        <?php
-											echo "<pre>$table</pre>";
-										?>
-                                    </div>
-                                </div>
-									
-                                </div>
-                            </div>
-                        </div>
 
-                <?php
-						}
-				?>
-					
                     </div>
                 </div>
 
                 <!-- footer content -->
                 <footer>
                     <div class="">
-                        <p class="pull-right">Gentelella Alela! a Bootstrap 3 template by <a>Kimlabs</a>. |
-                            <span class="lead"> <i class="fa fa-paw"></i> Gentelella Alela!</span>
+                        <p class="pull-right">Market Analysis based on Social NetWorK
+                            <span class="lead"> <i class="fa fa-paw"></i> |MASK</span>
                         </p>
                     </div>
                     <div class="clearfix"></div>
