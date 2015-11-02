@@ -57,7 +57,7 @@ if(isset($_POST['brand1']) && isset($_POST['brand2']))
 	var aData={
 	<?php
 	
-	$x = explode(" ",$brand1values[1]);
+	/*$x = explode(" ",$brand1values[1]);
 	$x=array_filter($x,'myFilter');
 	echo "labels:[";
 	$i=0;
@@ -67,11 +67,11 @@ if(isset($_POST['brand1']) && isset($_POST['brand2']))
 		$i++;
 		if($i<count($x)) echo ",";
 	}
-	echo "],"; ?>
-		
+	echo "],"; */?>
+	labels:["Negative","Neutral","Positive"],
 	datasets: [
         {
-            label: "Dataset",
+            label: "Brand A",
             fillColor: "#<?php echo substr(md5(rand()), 0, 6);?>",
             strokeColor: "rgba(151,187,205,0.8)",
             highlightFill: "rgba(151,187,205,0.75)",
@@ -90,33 +90,14 @@ if(isset($_POST['brand1']) && isset($_POST['brand2']))
 			}
 			?>
 				]
-        }
-			  ]	
-	};
-	
-	var bData = {
-	<?php
-	
-	$x = explode(" ",$brand2values[1]);
-	$x=array_filter($x,'myFilter');
-	echo "labels:[";
-	$i=0;
-	foreach($x as $k=>$v){
-		//if(!empty($v) || $v==0) {
-		echo $v;
-		$i++;
-		if($i<count($x)) echo ",";
-		
-	}
-	echo "],"; ?>
-    datasets: [
-        {
-            label: "Dataset",
+        },
+		{
+			label: "Brand B",
             fillColor: "#<?php echo substr(md5(rand()), 0, 6);?>",
             strokeColor: "rgba(151,187,205,0.8)",
             highlightFill: "rgba(151,187,205,0.75)",
             highlightStroke: "rgba(151,187,205,1)",
-            data: [
+			data: [
 			<?php
 				$x = explode(" ",$brand2values[2]);
 				$x=array_filter($x,'myFilter');
@@ -129,16 +110,15 @@ if(isset($_POST['brand1']) && isset($_POST['brand2']))
 				}
 			}
 			?>
-			]
-        }
-			  ]
+				  ]
+		}
+			  ]	
 	};
+	
 	function draw(){
 	//alert("drawing graph!");
 	var actx=document.getElementById("brandA").getContext("2d");
 	var myaBarChart= new Chart(actx).Bar(aData);
-	var bctx = document.getElementById("brandB").getContext("2d");
-	var mybBarChart = new Chart(bctx).Bar(bData);
 	}
 
 	</script>
@@ -294,7 +274,7 @@ if(isset($_POST['brand1']) && isset($_POST['brand2']))
                                             <div class="col-md-12 col-sm-6 col-xs-12">
 												<b>Brand A:</b>
                                                 <input type="text" id="brand1" name="brand1" required="required" class="form-control col-md-7 col-xs-12"></br>
-												<b>Brand A:</b>
+												<b>Brand B:</b>
 												<input type="text" id="brand2" name="brand2" required="required" class="form-control col-md-7 col-xs-12"></br>
                                             </div>
 											<div class="ln_solid"></div>
@@ -309,20 +289,10 @@ if(isset($_POST['brand1']) && isset($_POST['brand2']))
 										
 										<div>
 										<?php
-										if(isset($_POST['brand1'])){
-											echo "<h3>".$_POST['brand1']."</h3>";
+										if(isset($_POST['brand1']) && isset($_POST['brand2'])){
+											echo "<h3>".$_POST['brand1']." vs ".$_POST['brand2']."</h3>";
 										?>
 										<canvas id="brandA" align="center" width="400" height="400"></canvas>
-										<?php 
-										}
-										?>
-										</div>
-										<div style="margin-left:500px;margin-top:-450px">
-										<?php
-										if(isset($_POST['brand2'])){
-											echo "<h3>".$_POST['brand2']."</h3>";
-										?>
-										<canvas id="brandB" align="center" width="400" height="400"></canvas>
 										<?php 
 										}
 										?>
