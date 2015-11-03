@@ -5,6 +5,12 @@ session_start();
 $pluname="";
 include 'connection.php'; 
 
+if(isset($_SESSION['user_id'])) //every page checks if logged in ,and if not then go to login page , we are already in login page so no else condition
+{
+     header('Location: chartjs.php'); 
+ 
+}
+
  //the below code block is required as it controls which user can access the pages,please don't remove it
 if(isset($_POST['submit1'])){
 		//conn object is initialized in connection.php

@@ -79,8 +79,10 @@ score.sentiment = function(sentences, pos.words, neg.words, .progress='none')
   return(scores.df)
 }
 
-pos = scan('D:/wamp/www/MASK/R Scripts/positive-words.txt', what='character', comment.char=';')
-neg = scan('D:/wamp/www/MASK/R Scripts/negative-words.txt', what='character', comment.char=';')
+#pos = scan('D:/wamp/www/MASK/R Scripts/positive-words.txt', what='character', comment.char=';')
+#neg = scan('D:/wamp/www/MASK/R Scripts/negative-words.txt', what='character', comment.char=';')
+pos = scan('C:/wamp/www/MASK/R Scripts/positive-words.txt', what='character', comment.char=';')
+neg = scan('C:/wamp/www/MASK/R Scripts/negative-words.txt', what='character', comment.char=';')
 
 brand1analysis = score.sentiment(brand1_Tweets.text, pos, neg)
 brand2analysis = score.sentiment(brand2_Tweets.text, pos, neg)

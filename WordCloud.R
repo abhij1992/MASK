@@ -53,7 +53,7 @@ filename=paste("wordclouds/",format(Sys.time(), "%Y.%m.%d.%s"),".png",sep="")
 words <- names(v)
 d <- data.frame(word=words, freq=v)
 png(filename, width=4, height=4, units="in", res=300)
-wordcloud(d$word,d$freq,min.freq=10)
+wordcloud(d$word,d$freq,min.freq=5)
 dev.off() #only 129kb in size
 cat("filename-start")
 filename

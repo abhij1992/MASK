@@ -2,6 +2,11 @@
 <html lang="en">
 <?php 
 session_start();
+if(!isset($_SESSION['user_id'])) //every page checks if logged in ,and if not then go to login page , we are already in login page so no else condition
+{
+     header('Location: index.php'); 
+ 
+}
 $pluname="";
 include 'connection.php';
 
@@ -41,8 +46,8 @@ function getTable($tag){
 if(isset($_GET['hashtag']))
 {
 	$keyword=$_GET['hashtag'];
-	$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
-	//$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
+	//$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
+	$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
 	//echo "Result contains ";
     //echo "<pre>$output</pre>";	
 	$table=get_string_between($output,"table-start","table-end");
@@ -232,12 +237,12 @@ if(isset($_GET['hashtag']))
 
                         <div class="menu_section">
 						
-                            <h3>General</h3>
+                            <h3>Sentimental</h3>
                             <ul class="nav side-menu">
-                                <li><a><i class="fa fa-home"></i> Home <span class="fa fa-chevron-down"></span></a>
+                                <li><a  href='chartjs.php' ><i class="fa fa-search"></i> Single search <span class="fa fa-chevron-down"></span></a>
                                     
                                 </li>
-							<li><a><i class="fa fa-edit"></i> Previous Hashtags <span class="fa fa-chevron-down"></span></a>
+							<li><a ><i class="fa fa-history"></i> Previous Hashtags <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu" style="display: none">
                                         <?php
 											$sql="SELECT tag from hashtags LIMIT 10;";
@@ -250,8 +255,58 @@ if(isset($_GET['hashtag']))
 										?>
                                     </ul>
                                 </li>
+							<li><a><i class="fa fa-star"></i> Favourite   <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu" style="display: none">
+                                        <?php
+											$sql="SELECT tag from hashtags where is_fav=1;";
+											$res=$conn->query($sql);
+												while($row = $res->fetch_assoc())
+												{
+													echo "<li><a href='chartjs.php?hashtag=".$row["tag"]."'>".$row["tag"]."</a></li>";
+												}
+		
+										?>
+                                    </ul>
+                                </li>
                             </ul>
 							
+							
+							<h3>Word Cloud</h3>
+                            <ul class="nav side-menu">
+                                <li><a href="wordcloud.php"><i class="fa fa-cloud"></i> Word Cloud </a>
+                                </li>
+                                <li><a><i class="fa fa-history"></i> Word Cloud searches <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu" style="display: none">
+                                        <?php
+											$sql="SELECT tag from word_cloud LIMIT 10;";
+											$res=$conn->query($sql);
+												while($row = $res->fetch_assoc())
+												{
+													echo "<li><a href='word_cloud_past.php?hashtag=".$row["tag"]."'>".$row["tag"]."</a></li>";
+												}
+		
+										?>
+                                    </ul>
+                                </li>
+								<li><a><i class="fa fa-star"></i> Favourite   <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu" style="display: none">
+                                        <?php
+											$sql="SELECT tag from word_cloud where is_fav=1;";
+											$res=$conn->query($sql);
+												while($row = $res->fetch_assoc())
+												{
+													echo "<li><a href='word_cloud_past.php?hashtag=".$row["tag"]."'>".$row["tag"]."</a></li>";
+												}
+		
+										?>
+                                    </ul>
+                                </li>
+                            </ul>
+							<h3>Comparison</h3>
+                            <ul class="nav side-menu">
+                                <li><a href="brand.php"><i class="fa fa-legal"></i>Comparison </a>
+                                </li>
+                            </ul>
                         </div>
                         <div class="menu_section">
 							
@@ -298,13 +353,7 @@ if(isset($_GET['hashtag']))
                                     <span class=" fa fa-angle-down"></span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-usermenu animated fadeInDown pull-right">
-                                    <li><a href="javascript:;">  Profile</a>
-                                    </li>
-                                    
-                                    <li>
-                                        <a href="javascript:;">Help</a>
-                                    </li>
-                                    <li><a href="login.html"><i class="fa fa-sign-out pull-right"></i> Log Out</a>
+                                    <li><a href="logout.php"><i class="fa fa-sign-out pull-right"></i> Log Out</a>
                                     </li>
                                 </ul>
                             </li>
@@ -371,34 +420,75 @@ if(isset($_GET['hashtag']))
                                         </div>
 										</form>
 										
-										<?php
-											if(isset($_GET["compare"]) && $_GET["compare"]==1){
-										?>
-										<div>
-										<h3>Previous Sentimental Chart</h3>
 										
-										<canvas id="myPreviousChart" align="center" width="400" height="400"></canvas>
-										</div>
-										<?php
-											}
-										?>
-										<div 
-										<?php
-										if(isset($_GET["compare"]) && $_GET["compare"]==1){
-										 ?>
-										style="margin-left:500px;margin-top:-450px"
-										<?php
-										}
-										?>
-										>
-										<h3>Current Sentimental Chart</h3>
-										<canvas id="myChart" align="center" width="400" height="400"></canvas>
-										</div>
                                 </div>
 								
 									
                             </div>
                         </div>
+						<?php
+						if((isset($_GET["compare"]) && $_GET["compare"]==1)||(isset($_GET["hashtag"])))
+						{
+						?>
+						<div class="col-md-12 col-sm-12 col-xs-12">
+                            <div class="x_panel">
+                                <div class="x_title">
+                                    <h2>Sentimental<small>Chart</small></h2>
+                                    <ul class="nav navbar-right panel_toolbox">
+                                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                        </li>
+                                       
+                                        <li><a class="close-link"><i class="fa fa-close"></i></a>
+                                        </li>
+                                    </ul>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="x_content">
+                                    <br>
+                                    
+                                    
+						 
+						<?php
+						}
+						?>
+						<?php
+						if(isset($_GET["compare"]) && $_GET["compare"]==1){
+						?>
+										<div style="float:left;">
+										<h3>Previous Sentimental Chart</h3>
+										
+										<canvas id="myPreviousChart" align="center" width="400" height="400"></canvas>
+										</div>
+						<?php
+						}
+						?> 
+						<?php
+						if((isset($_GET["compare"]) && $_GET["compare"]==1)||(isset($_GET["hashtag"])))
+						{
+							if(isset($_GET["hashtag"]))
+							{
+						 ?>				
+								<div style="float:left;">							
+						<?php
+							}
+							else{
+								echo "<div style='float:right;'>";
+							}
+						?>
+							<h3>Current Sentimental Chart</h3>
+										<canvas id="myChart" align="center" width="400" height="400"></canvas>
+										</div>
+								</div>
+										
+							</div>
+                        </div>
+									
+                                
+						<?php
+						}
+						?>
+										
+										
 
                     </div>
                 </div>
@@ -407,7 +497,7 @@ if(isset($_GET['hashtag']))
                 <footer>
                     <div class="">
                         <p class="pull-right">Market Analysis based on Social NetWorK
-                            <span class="lead"> <i class="fa fa-paw"></i> |MASK</span>
+                            <span class="lead"> <i class="fa fa-bar-chart"></i> |MASK</span>
                         </p>
                     </div>
                     <div class="clearfix"></div>

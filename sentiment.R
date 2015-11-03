@@ -58,14 +58,14 @@ score.sentiment = function(sentences, pos.words, neg.words, .progress='none')
   return(scores.df)
 }
 
-tweets <- searchTwitter(keyword, n=10, lang="en")
+tweets <- searchTwitter(keyword, n=100, lang="en")
 #we have to extract their text and save it into the variable tweets.text by typing:
 Tweets.text = lapply(tweets,function(t)t$getText())
 
-pos = scan('D:/wamp/www/MASK/Web-Mask/positive-words.txt', what='character', comment.char=';')
-neg = scan('D:/wamp/www/MASK/Web-Mask/negative-words.txt', what='character', comment.char=';')
-#pos = scan('C:/wamp/www/MASK/Web-Mask/positive-words.txt', what='character', comment.char=';')
-#neg = scan('C:/wamp/www/MASK/Web-Mask/negative-words.txt', what='character', comment.char=';')
+#pos = scan('D:/wamp/www/MASK/Web-Mask/positive-words.txt', what='character', comment.char=';')
+#neg = scan('D:/wamp/www/MASK/Web-Mask/negative-words.txt', what='character', comment.char=';')
+pos = scan('C:/wamp/www/MASK/Web-Mask/positive-words.txt', what='character', comment.char=';')
+neg = scan('C:/wamp/www/MASK/Web-Mask/negative-words.txt', what='character', comment.char=';')
 
 
 

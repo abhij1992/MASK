@@ -2,6 +2,11 @@
 <html lang="en">
 <?php 
 session_start();
+if(!isset($_SESSION['user_id'])) //every page checks if logged in ,and if not then go to login page , we are already in login page so no else condition
+{
+     header('Location: index.php'); 
+ 
+}
 $pluname="";
 include 'connection.php'; 
 
@@ -34,8 +39,8 @@ function insertTable($table,$tag){
 if(isset($_POST['hashtag']))
 {
 	$keyword=$_POST['hashtag'];
-	$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
-	//$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
+	//$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
+	$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
 	//echo "Result contains ";
     // echo "<pre>$output</pre>";	
 	$table=get_string_between($output,"table-start","table-end");
@@ -197,7 +202,7 @@ if(isset($_POST['hashtag']))
                                     <li>
                                         <a href="javascript:;">Help</a>
                                     </li>
-                                    <li><a href="login.html"><i class="fa fa-sign-out pull-right"></i> Log Out</a>
+                                    <li><a href="logout.php"><i class="fa fa-sign-out pull-right"></i> Log Out</a>
                                     </li>
                                 </ul>
                             </li>
@@ -297,7 +302,7 @@ if(isset($_POST['hashtag']))
                                 </div>
                                 <div class="x_content">
                                     <br>
-                                    <img src="<?php echo $filename; ?>" alt="Mountain View" style="width:700px;" align="center">
+                                    <img src="<?php echo $filename; ?>" alt="Word Cloud" style="width:700px;" align="center">
 									<div class="bs-example" data-example-id="simple-jumbotron">
                                     <div class="jumbotron">
                                         <h3>Word counts</h3>

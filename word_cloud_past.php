@@ -2,6 +2,11 @@
 <html lang="en">
 <?php 
 session_start();
+if(!isset($_SESSION['user_id'])) //every page checks if logged in ,and if not then go to login page , we are already in login page so no else condition
+{
+     header('Location: index.php'); 
+ 
+}
 $pluname="";
 include 'connection.php'; 
 
@@ -203,7 +208,7 @@ if(isset($_GET['hashtag']))
                                     <li>
                                         <a href="javascript:;">Help</a>
                                     </li>
-                                    <li><a href="login.html"><i class="fa fa-sign-out pull-right"></i> Log Out</a>
+                                    <li><a href="logout.php"><i class="fa fa-sign-out pull-right"></i> Log Out</a>
                                     </li>
                                 </ul>
                             </li>
