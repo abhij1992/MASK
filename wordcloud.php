@@ -126,11 +126,45 @@ if(isset($_POST['hashtag']))
 
                         <div class="menu_section">
 						
-                            <h3>General</h3>
+                            <h3>Sentimental</h3>
                             <ul class="nav side-menu">
-                                <li><a href="wordcloud.php"><i class="fa fa-home"></i> Word Cloud </a>
+                                <li><a  href='chartjs.php' ><i class="fa fa-search"></i> Single search </a>
+                                    
                                 </li>
-                                <li><a><i class="fa fa-edit"></i> Word Cloud searches <span class="fa fa-chevron-down"></span></a>
+							<li><a ><i class="fa fa-history"></i> Previous Hashtags <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu" style="display: none">
+                                        <?php
+											$sql="SELECT tag from hashtags LIMIT 10;";
+											$res=$conn->query($sql);
+												while($row = $res->fetch_assoc())
+												{
+													echo "<li><a href='chartjs.php?hashtag=".$row["tag"]."&compare=1'>".$row["tag"]."</a></li>";
+												}
+		
+										?>
+                                    </ul>
+                                </li>
+							<li><a><i class="fa fa-star"></i> Favourite   <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu" style="display: none">
+                                        <?php
+											$sql="SELECT tag from hashtags where is_fav=1;";
+											$res=$conn->query($sql);
+												while($row = $res->fetch_assoc())
+												{
+													echo "<li><a href='chartjs.php?hashtag=".$row["tag"]."'>".$row["tag"]."</a></li>";
+												}
+		
+										?>
+                                    </ul>
+                                </li>
+                            </ul>
+							
+							
+							<h3>Word Cloud</h3>
+                            <ul class="nav side-menu">
+                                <li><a href="wordcloud.php"><i class="fa fa-cloud"></i> Word Cloud </a>
+                                </li>
+                                <li><a><i class="fa fa-history"></i> Word Cloud searches <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu" style="display: none">
                                         <?php
 											$sql="SELECT tag from word_cloud LIMIT 10;";
@@ -143,7 +177,7 @@ if(isset($_POST['hashtag']))
 										?>
                                     </ul>
                                 </li>
-								<li><a><i class="fa fa-edit"></i> Favourite   <span class="fa fa-chevron-down"></span></a>
+								<li><a><i class="fa fa-star"></i> Favourite   <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu" style="display: none">
                                         <?php
 											$sql="SELECT tag from word_cloud where is_fav=1;";
@@ -157,26 +191,21 @@ if(isset($_POST['hashtag']))
                                     </ul>
                                 </li>
                             </ul>
+							<h3>Comparison</h3>
+                            <ul class="nav side-menu">
+                                <li><a href="brand.php"><i class="fa fa-legal"></i>Comparison </a>
+                                </li>
+                            </ul>
                         </div>
+                        <div class="menu_section">
+							
+							
+                        </div>
+
                     </div>
                     <!-- /sidebar menu -->
 
-                    <!-- /menu footer buttons -->
-                    <div class="sidebar-footer hidden-small">
-                        <a data-toggle="tooltip" data-placement="top" title="Settings">
-                            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-                        </a>
-                        <a data-toggle="tooltip" data-placement="top" title="FullScreen">
-                            <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
-                        </a>
-                        <a data-toggle="tooltip" data-placement="top" title="Lock">
-                            <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
-                        </a>
-                        <a data-toggle="tooltip" data-placement="top" title="Logout">
-                            <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
-                        </a>
-                    </div>
-                    <!-- /menu footer buttons -->
+                    
                 </div>
             </div>
 
@@ -196,12 +225,6 @@ if(isset($_POST['hashtag']))
                                     <span class=" fa fa-angle-down"></span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-usermenu animated fadeInDown pull-right">
-                                    <li><a href="javascript:;">  Profile</a>
-                                    </li>
-                                    
-                                    <li>
-                                        <a href="javascript:;">Help</a>
-                                    </li>
                                     <li><a href="logout.php"><i class="fa fa-sign-out pull-right"></i> Log Out</a>
                                     </li>
                                 </ul>
@@ -326,8 +349,8 @@ if(isset($_POST['hashtag']))
                 <!-- footer content -->
                 <footer>
                     <div class="">
-                        <p class="pull-right">Gentelella Alela! a Bootstrap 3 template by <a>Kimlabs</a>. |
-                            <span class="lead"> <i class="fa fa-paw"></i> Gentelella Alela!</span>
+                        <p class="pull-right">Market Analysis based on Social NetWorK
+                            <span class="lead"> <i class="fa fa-bar-chart"></i> |MASK</span>
                         </p>
                     </div>
                     <div class="clearfix"></div>

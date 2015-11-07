@@ -8,55 +8,57 @@ if(!isset($_SESSION['user_id'])) //every page checks if logged in ,and if not th
  
 }
 $pluname="";
-include 'connection.php'; 
+include 'connection.php';
 
 function myFilter($var){
   return ($var !== NULL && $var !== FALSE && $var !== '');
 }
+
 function insertTable($table,$tag){
 	global $conn;
 	if ($conn->connect_error) { //Check connection
 		die("Connection failed: " . $conn->connect_error);
 	}
-	if(isset($_POST["is_fav"])){
+	if(isset($_GET["is_fav"])){
 		$is_fav=1;
 	}
 	else $is_fav=0;
-	if($res=$conn->query("SELECT count(*) as entry from word_cloud WHERE `tag`='".$tag."';")){
+	if($res=$conn->query("SELECT count(*) as entry from hashtags WHERE `tag`='".$tag."';")){
 		$row=$res->fetch_assoc();
 		if($row["entry"]=='0'){
-			if(!$conn->query("INSERT INTO word_cloud(tag,date_time,source_location,user_id,is_fav) VALUES('".$tag."','".date("Y-m-d H:i:s")."','".$table."','".$_SESSION["user_id"]."','".$is_fav."');")){
+			if(!$conn->query("INSERT INTO hashtags(tag,date_time,graph_values,user_id,is_fav) VALUES('".$tag."','".date("Y-m-d H:i:s")."','".$table."','".$_SESSION["user_id"]."','".$is_fav."');")){
 				echo "Failed to insert";
 			}
 		}else{
-			if(!$conn->query("UPDATE word_cloud set date_time='".date("Y-m-d H:i:s")."',source_location='".$table."',is_fav=".$is_fav." WHERE tag='".$tag."';")){
+			if(!$conn->query("UPDATE hashtags set date_time='".date("Y-m-d H:i:s")."',graph_values='".$table."' WHERE tag='".$tag."';")){
 				echo "Failed to update";
 			}
 		}
 	}
 }
+function getTable($tag){
+	global $conn;
+	$sql="SELECT graph_values FROM hashtags WHERE tag='".$tag."';";
+	$res=$conn->query($sql);
+	$row=$res->fetch_assoc();
+	return $row["graph_values"];
+}
 if(isset($_GET['hashtag']))
 {
-	
-	$sql="SELECT * from word_cloud WHERE `tag`='".$_GET['hashtag']."';";
-	$res=$conn->query($sql);
-	while($row = $res->fetch_assoc())
-	{
-		$old=$row["source_location"];
-	}
 	$keyword=$_GET['hashtag'];
-	//$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
-	$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe WordCloud.R $keyword");//supply path to your Rscript.exe file
+	//$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
+	$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe sentiment.R $keyword");//supply path to your Rscript.exe file
 	//echo "Result contains ";
-    // echo "<pre>$output</pre>";	
+    //echo "<pre>$output</pre>";	
 	$table=get_string_between($output,"table-start","table-end");
-	$filename=get_string_between($output,"filename-start","filename-end");
-	$filename = substr($filename, 5, -2);
+	if(isset($_GET['compare']) && $_GET['compare']=='1'){
+		$previousTable=getTable($keyword);
+		$previousValues=explode("\n",$previousTable);
+	}
+	insertTable($table,$keyword);
 	//echo "<pre>$table</pre>";
-	//$values = explode("\n",$table);
+	$values = explode("\n",$table);
 	//echo "X axis = ".$values[1]." \n Y axis = ".$values[2]."";
-	//echo $filename;
-	insertTable($filename,$keyword);
 }
 ?>
 <head>
@@ -93,7 +95,110 @@ if(isset($_GET['hashtag']))
           <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
 
+	<script>
+	//chart related code block
+	window.onload = draw; // try to draw the chart after pages load if data give or else does nothing
+	<?php
+	if(isset($_GET["compare"]) && $_GET["compare"]==1){
+	?>
+	var prevData={
+	<?php
 	
+	$x = explode(" ",$previousValues[1]);
+	$x=array_filter($x,'myFilter');
+	echo "labels:[";
+	$i=0;
+	foreach($x as $k=>$v){
+		//if(!empty($v) || $v==0) {
+		echo $v;
+		$i++;
+		if($i<count($x)) echo ",";
+		
+	}
+	echo "],"; ?>
+		
+	datasets: [
+        {
+            label: "Dataset",
+            fillColor: "#<?php echo substr(md5(rand()), 0, 6);?>",
+            strokeColor: "rgba(151,187,205,0.8)",
+            highlightFill: "rgba(151,187,205,0.75)",
+            highlightStroke: "rgba(151,187,205,1)",
+            data: [
+			<?php
+				$x = explode(" ",$previousValues[2]);
+				$x=array_filter($x,'myFilter');
+				$i=0;
+				foreach($x as $k=>$v){
+				if(!empty($v)) {
+				echo $v;
+				$i++;
+				if($i<count($x)) echo ",";
+				}
+			}
+			?>
+				]
+        }
+			  ]	
+	};
+	<?php
+	}
+	?>
+	
+	var data = {
+	<?php
+	
+	$x = explode(" ",$values[1]);
+	$x=array_filter($x,'myFilter');
+	echo "labels:[";
+	$i=0;
+	foreach($x as $k=>$v){
+		//if(!empty($v) || $v==0) {
+		echo $v;
+		$i++;
+		if($i<count($x)) echo ",";
+		
+	}
+	echo "],"; ?>
+    datasets: [
+        {
+            label: "Dataset",
+            fillColor: "#<?php echo substr(md5(rand()), 0, 6);?>",
+            strokeColor: "rgba(151,187,205,0.8)",
+            highlightFill: "rgba(151,187,205,0.75)",
+            highlightStroke: "rgba(151,187,205,1)",
+            data: [
+			<?php
+				$x = explode(" ",$values[2]);
+				$x=array_filter($x,'myFilter');
+				$i=0;
+				foreach($x as $k=>$v){
+				if(!empty($v)) {
+				echo $v;
+				$i++;
+				if($i<count($x)) echo ",";
+				}
+			}
+			?>
+			]
+        }
+			  ]
+	};
+	function draw(){
+	//alert("drawing graph!");
+	var ctx = document.getElementById("myChart").getContext("2d");
+	var myBarChart = new Chart(ctx).Bar(data);
+	<?php
+	if(isset($_GET["compare"]) && $_GET["compare"]==1){
+	?>
+	var prevctx=document.getElementById("myPreviousChart").getContext("2d");
+	var myPrevBarChart= new Chart(prevctx).Bar(prevData);
+	<?php
+	}
+	?>
+	}
+
+	</script>
 </head>
 
 
@@ -211,7 +316,7 @@ if(isset($_GET['hashtag']))
                     </div>
                     <!-- /sidebar menu -->
 
-                    
+                   
                 </div>
             </div>
 
@@ -281,45 +386,37 @@ if(isset($_GET['hashtag']))
                                     <div class="clearfix"></div>
                                 </div>
                                 <div class="x_content">
-											<form name="sentiment" action="wordcloud.php" method="post" >
+											<form name="sentiment" action="" method="get">
                                             <div class="col-md-12 col-sm-6 col-xs-12">
-                                                <input type="text" id="tag" name="hashtag" required="required" class="form-control col-md-7 col-xs-12">
+                                                <input type="text" id="tag" name="hashtag" required="required" class="form-control col-md-7 col-xs-12"></br>
 												<input type ="checkbox" name="is_fav" value="1">Favorite tag</br>
                                             </div>
 											<div class="ln_solid"></div>
-											
-                                            <div class="form-group">
-											 <div class="ln_solid"></div>
+											<div class="form-group">
                                             <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
 											
-
+												
                                                 <button type="submit" class="btn btn-primary">Cancel</button>
                                                 <button type="submit" class="btn btn-success">Submit</button>
 												
                                             </div>
-											
-												
-											
                                         </div>
 										</form>
 										
+										
                                 </div>
-
 								
 									
                             </div>
                         </div>
-						
-						
-						
-						
-				<?php if(isset($_GET['hashtag']))
+						<?php
+						if((isset($_GET["compare"]) && $_GET["compare"]==1)||(isset($_GET["hashtag"])))
 						{
-				?>
+						?>
 						<div class="col-md-12 col-sm-12 col-xs-12">
                             <div class="x_panel">
                                 <div class="x_title">
-                                    <h2>Word Cloud <small>Associated words</small></h2>
+                                    <h2>Sentimental<small>Chart</small></h2>
                                     <ul class="nav navbar-right panel_toolbox">
                                         <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                                         </li>
@@ -331,25 +428,51 @@ if(isset($_GET['hashtag']))
                                 </div>
                                 <div class="x_content">
                                     <br>
-									<img src="<?php echo $old; ?>" alt="Mountain View" style="width:450px;" align="center">
-                                    <img src="<?php echo $filename; ?>" alt="Mountain View" style="width:450px;" align="center">
-									<div class="bs-example" data-example-id="simple-jumbotron">
-                                    <div class="jumbotron">
-                                        <h3>Word counts</h3>
-                                        <?php
-											echo "<pre>$table</pre>";
-										?>
-                                    </div>
-                                </div>
-									
-                                </div>
-                            </div>
-                        </div>
-
-                <?php
+                                    
+                                    
+						 
+						<?php
 						}
-				?>
-					
+						?>
+						<?php
+						if(isset($_GET["compare"]) && $_GET["compare"]==1){
+						?>
+										<div style="float:left;">
+										<h3>Previous Sentimental Chart</h3>
+										
+										<canvas id="myPreviousChart" align="center" width="400" height="400"></canvas>
+										</div>
+						<?php
+						}
+						?> 
+						<?php
+						if((isset($_GET["compare"]) && $_GET["compare"]==1)||(isset($_GET["hashtag"])))
+						{
+							if(isset($_GET["hashtag"]))
+							{
+						 ?>				
+								<div style="float:left;">							
+						<?php
+							}
+							else{
+								echo "<div style='float:right;'>";
+							}
+						?>
+							<h3>Current Sentimental Chart</h3>
+										<canvas id="myChart" align="center" width="400" height="400"></canvas>
+										</div>
+								</div>
+										
+							</div>
+                        </div>
+									
+                                
+						<?php
+						}
+						?>
+										
+										
+
                     </div>
                 </div>
 

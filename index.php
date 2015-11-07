@@ -53,7 +53,7 @@ if(isset($_POST['submit2'])){
 		$sorry="<div><h4>The user name already exists</h4></div>";
 	}
 	else{
-		$sql="INSERT INTO `mask`.`user_info` (`id`, `username`, `password`, `name`) VALUES (NULL, '".$_POST['user_name']."', '".$_POST['password']."', '".$_POST['uname']."');";
+		$sql="INSERT INTO `mask`.`user_info` (`id`, `username`, `password`, `name`) VALUES (NULL, '".$_POST['uname']."', '".$_POST['password']."', '".$_POST['user_name']."');";
 		$conn->query($sql);
 		$sql = "SELECT id,username,password FROM user_info where username='".$_POST['user_name']."' ";
 		$result = $conn->query($sql);

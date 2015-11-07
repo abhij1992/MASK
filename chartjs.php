@@ -14,8 +14,46 @@ function myFilter($var){
   return ($var !== NULL && $var !== FALSE && $var !== '');
 }
 
-function insertTable($table,$tag){
+function insertTweet($postweet,$negtweet,$tagid)
+{
 	global $conn;
+	if ($conn->connect_error) { //Check connection
+		die("Connection failed: " . $conn->connect_error);
+	}
+
+	if($res=$conn->query("SELECT count(*) as entry from tweet WHERE `tag_id`='".$tagid."';")){
+		$row=$res->fetch_assoc();
+		if($row["entry"]=='0'){
+			$sql="INSERT INTO tweet(neg_tweet,pos_tweet,tag_id) VALUES('".mysqli_real_escape_string($conn,$negtweet)."','".mysqli_real_escape_string($conn,$postweet)."','".$tagid."');";
+			//echo "Insert Query is ".$sql;
+			if(!$conn->query($sql)){
+				echo "Failed to insert tweet";
+			}
+		}else{
+			$sql="UPDATE tweet set neg_tweet='".mysqli_real_escape_string($conn,$negtweet)."',pos_tweet='".mysqli_real_escape_string($conn,$postweet)."' WHERE tag_id='".$tagid."';";
+			//echo "Update error ".$sql;
+			if(!$conn->query($sql)){
+				echo "Failed to update tweet";
+			}
+		}
+	}
+}
+
+function getTagId($hashtag)
+{
+	global $conn;
+	if ($conn->connect_error) { //Check connection
+		die("Connection failed: " . $conn->connect_error);
+	}
+	if($res=$conn->query("SELECT id FROM hashtags WHERE tag='".$hashtag."';")){
+				$row=$res->fetch_assoc();
+				return $row["id"];
+	}
+	else return -1;
+}
+
+function insertTable($table,$tag){
+	global $conn,$goodtweets,$worsttweets;
 	if ($conn->connect_error) { //Check connection
 		die("Connection failed: " . $conn->connect_error);
 	}
@@ -29,9 +67,21 @@ function insertTable($table,$tag){
 			if(!$conn->query("INSERT INTO hashtags(tag,date_time,graph_values,user_id,is_fav) VALUES('".$tag."','".date("Y-m-d H:i:s")."','".$table."','".$_SESSION["user_id"]."','".$is_fav."');")){
 				echo "Failed to insert";
 			}
+			else{
+					if(($tid=getTagId($tag))!=-1)
+					{
+						insertTweet($goodtweets,$worsttweets,$tid);
+					}
+			}
 		}else{
 			if(!$conn->query("UPDATE hashtags set date_time='".date("Y-m-d H:i:s")."',graph_values='".$table."' WHERE tag='".$tag."';")){
 				echo "Failed to update";
+			}
+			else{
+					if(($tid=getTagId($tag))!=-1)
+					{
+						insertTweet($goodtweets,$worsttweets,$tid);
+					}
 			}
 		}
 	}
@@ -43,6 +93,16 @@ function getTable($tag){
 	$row=$res->fetch_assoc();
 	return $row["graph_values"];
 }
+function getPreviousTweets($tag){
+	global $conn;
+	if(($tid=getTagId($tag))!=-1){
+		$sql="SELECT neg_tweet,pos_tweet FROM tweet WHERE tag_id='".$tid."';";
+		$res=$conn->query($sql);
+		$row=$res->fetch_assoc();
+		return array($row["neg_tweet"],$row["pos_tweet"]);
+	}
+	
+}
 if(isset($_GET['hashtag']))
 {
 	$keyword=$_GET['hashtag'];
@@ -51,9 +111,12 @@ if(isset($_GET['hashtag']))
 	//echo "Result contains ";
     //echo "<pre>$output</pre>";	
 	$table=get_string_between($output,"table-start","table-end");
+	$goodtweets=get_string_between($output,"best-tweet","best-tweet-end");
+	$worsttweets=get_string_between($output,"worst-tweet","worst-tweet-end");
 	if(isset($_GET['compare']) && $_GET['compare']=='1'){
 		$previousTable=getTable($keyword);
 		$previousValues=explode("\n",$previousTable);
+		$previousTweets=getPreviousTweets($keyword);
 	}
 	insertTable($table,$keyword);
 	//echo "<pre>$table</pre>";
@@ -80,7 +143,61 @@ if(isset($_GET['hashtag']))
     <!-- Custom styling plus plugins -->
     <link href="css/custom.css" rel="stylesheet">
     <link href="css/icheck/flat/green.css" rel="stylesheet">
+	<style>
+	
+.container-twt {
+	margin:0 auto;
+	width:400px;
+}
 
+.tw-icon-twt {
+	margin:0 auto;
+}
+
+/* ----------------------------------
+Twitter popup notification
+------------------------------------ */
+.notification-box-twt {
+	border:1px solid #000;
+	border-radius:5px;
+	background:-webkit-linear-gradient(#fff 0%, #ccc);
+	position:relative;
+	margin:20px 0 0 0;
+	padding-bottom:10px;
+}
+
+
+/* ----------------------------------
+twitter list tweet news
+------------------------------------ */
+.list-twt {
+	border-bottom:1px solid #999;
+	padding:10px;
+	position:relative;
+	min-height:70px;
+	box-shadow:0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.list-twt .avatar-twt {
+	float:left;
+	margin-right:10px;
+	width:50px;
+	height:50px;
+}
+.list-twt .content-twt {
+	font-size:12px;
+	margin-right:20px;
+}
+.list-twt .time-twt {
+	position:absolute;
+	right:0;
+	top:0;
+	margin:10px 10px 0 0;
+	font-style:normal;
+	font-size:11px;
+	color:#aaa;
+}
+
+	</style>
 
     <script src="js/jquery.min.js"></script>
 	<script src="js/chartjs/chart.min.js"></script> <!--Include chart.js file-->
@@ -239,7 +356,7 @@ if(isset($_GET['hashtag']))
 						
                             <h3>Sentimental</h3>
                             <ul class="nav side-menu">
-                                <li><a  href='chartjs.php' ><i class="fa fa-search"></i> Single search <span class="fa fa-chevron-down"></span></a>
+                                <li><a  href='chartjs.php' ><i class="fa fa-search"></i> Single search </a>
                                     
                                 </li>
 							<li><a ><i class="fa fa-history"></i> Previous Hashtags <span class="fa fa-chevron-down"></span></a>
@@ -316,24 +433,7 @@ if(isset($_GET['hashtag']))
                     </div>
                     <!-- /sidebar menu -->
 
-                    <!-- /menu footer buttons -->
-					<!--
-                    <div class="sidebar-footer hidden-small">
-                        <a data-toggle="tooltip" data-placement="top" title="Settings">
-                            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-                        </a>
-                        <a data-toggle="tooltip" data-placement="top" title="FullScreen">
-                            <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
-                        </a>
-                        <a data-toggle="tooltip" data-placement="top" title="Lock">
-                            <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
-                        </a>
-                        <a data-toggle="tooltip" data-placement="top" title="Logout">
-                            <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
-                        </a>
-                    </div>
-					-->
-                    <!-- /menu footer buttons -->
+                   
                 </div>
             </div>
 
@@ -412,7 +512,7 @@ if(isset($_GET['hashtag']))
 											<div class="form-group">
                                             <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
 											
-
+												
                                                 <button type="submit" class="btn btn-primary">Cancel</button>
                                                 <button type="submit" class="btn btn-success">Submit</button>
 												
@@ -490,9 +590,87 @@ if(isset($_GET['hashtag']))
 										
 										
 
-                    </div>
-                </div>
-
+						</div>
+						<?php
+					if(isset($_GET["hashtag"]) && isset($_GET["compare"]))
+					{
+						?>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+                            <div class="x_panel">
+                                <div class="x_title">
+                                    <h2>Tweets<small>Previous</small></h2>
+                                    <ul class="nav navbar-right panel_toolbox">
+                                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                        </li>
+                                       
+                                        <li><a class="close-link"><i class="fa fa-close"></i></a>
+                                        </li>
+                                    </ul>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="x_content">
+                                <h3>Best Tweets</h3>  
+                                <?php
+								//contet should come here
+								echo $previousTweets[1];
+								?>
+                                <h3>Worst tweets</h3>   
+								 <?php
+								//contet should come here
+								echo $previousTweets[0];
+								?>
+						
+								</div>
+                        </div>
+					</div>
+					</div>					
+						<?php
+					}
+					?>
+						
+					<?php
+					if(isset($_GET["hashtag"]))
+					{
+						?>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+                            <div class="x_panel">
+                                <div class="x_title">
+                                    <h2>Tweets<small>Current</small></h2>
+                                    <ul class="nav navbar-right panel_toolbox">
+                                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                        </li>
+                                       
+                                        <li><a class="close-link"><i class="fa fa-close"></i></a>
+                                        </li>
+                                    </ul>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="x_content">
+                                <h3>Best Tweets</h3>  
+                                <?php
+								//contet should come here
+								echo $goodtweets;
+								?>
+                                <h3>Worst tweets</h3>   
+								 <?php
+								//contet should come here
+								echo $worsttweets;
+								?>
+						
+								</div>
+                        </div>
+					</div>	
+					</div>
+						<?php
+					}
+					?>
+					
+					
+					
+					
+					
+					</div>
+					<!-- row content -->	
                 <!-- footer content -->
                 <footer>
                     <div class="">
@@ -504,10 +682,11 @@ if(isset($_GET['hashtag']))
                 </footer>
                 <!-- /footer content -->
 
-            </div>
+				</div>
+			</div>
             <!-- /page content -->
-        </div>
-
+        
+	</div>
     </div>
 
     <div id="custom_notifications" class="custom-notifications dsp_none">
