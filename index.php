@@ -117,7 +117,7 @@ if(isset($_POST['submit2'])){
                         </div>
                         <div>
 							<button type="submit" name="submit1" class="btn btn-success" value="submit1">Submit</button>
-                            <a class="reset_pass" href="#">Lost your password?</a>
+                          
                         </div>
                         <?php echo $pluname;?>
 						<div class="clearfix"></div>
