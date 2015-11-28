@@ -86,7 +86,15 @@ if(isset($_POST['hashtag']))
           <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
           <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
-
+	<script>
+	function specialCharacterPresent(){
+	var reg="/[$&+,:;=?@#^|*\ ]/gi";
+	var str=document.getElementById("tag").value;
+	//alert(str);
+	if(str.match(/[$&+,:;=?@#^|*\ ]/gi)!==null) {alert("Please remove special characters");return false;}
+	else {return true;}
+	}
+	</script>
 	
 </head>
 
@@ -275,7 +283,7 @@ if(isset($_POST['hashtag']))
                                     <div class="clearfix"></div>
                                 </div>
                                 <div class="x_content">
-											<form name="sentiment" action="" method="post" >
+											<form name="sentiment" action="" method="post" onsubmit="return specialCharacterPresent()">
                                             <div class="col-md-12 col-sm-6 col-xs-12">
                                                 <input type="text" id="tag" name="hashtag" required="required" class="form-control col-md-7 col-xs-12">
 												<input type ="checkbox" name="is_fav" value="1">Favorite tag</br>

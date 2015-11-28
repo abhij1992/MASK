@@ -133,6 +133,22 @@ if(isset($_POST['brand1']) && isset($_POST['brand2']))
 	
 	
 	</script>
+	<script>
+	function specialCharacterPresent(str){
+	var reg="/[$&+,:;=?@#^|*\ ]/gi";
+	if(str.match(/[$&+,:;=?@#^|*\ ]/gi)!==null) {alert("Please remove special characters from "+str);return false;}
+	else {return true;}
+	}
+	function validate(){
+		var brand1=document.getElementById("brand1").value;
+		var brand2=document.getElementById("brand2").value;
+		if(brand1==brand2){alert("Brand names can't be same"); return false;}
+		if(!specialCharacterPresent(brand1)||!specialCharacterPresent(brand2)){
+			return false;
+		}
+		return true;
+	}
+	</script>
 </head>
 
 
@@ -318,7 +334,7 @@ if(isset($_POST['brand1']) && isset($_POST['brand2']))
                                     <div class="clearfix"></div>
                                 </div>
                                 <div class="x_content">
-											<form name="brandcomparision" action="" method="post">
+											<form name="brandcomparision" action="" method="post" onsubmit="return validate()">
                                             <div class="col-md-12 col-sm-6 col-xs-12">
 												<b>Brand A:</b>
                                                 <input type="text" id="brand1" name="brand1" required="required" class="form-control col-md-7 col-xs-12"></br>

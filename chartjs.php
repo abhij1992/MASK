@@ -316,6 +316,15 @@ twitter list tweet news
 	}
 
 	</script>
+	<script>
+	function specialCharacterPresent(){
+	var reg="/[$&+,:;=?@#^|*\ ]/gi";
+	var str=document.getElementById("tag").value;
+	//alert(str);
+	if(str.match(/[$&+,:;=?@#^|*\ ]/gi)!==null) {alert("Please remove special characters");return false;}
+	else {return true;}
+	}
+	</script>
 </head>
 
 
@@ -503,7 +512,7 @@ twitter list tweet news
                                     <div class="clearfix"></div>
                                 </div>
                                 <div class="x_content">
-											<form name="sentiment" action="" method="get">
+											<form name="sentiment" action="" method="get" onSubmit=" return specialCharacterPresent()">
                                             <div class="col-md-12 col-sm-6 col-xs-12">
                                                 <input type="text" id="tag" name="hashtag" required="required" class="form-control col-md-7 col-xs-12"></br>
 												<input type ="checkbox" name="is_fav" value="1">Favorite tag</br>
