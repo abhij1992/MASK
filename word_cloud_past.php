@@ -22,14 +22,14 @@ function insertTable($table,$tag){
 		$is_fav=1;
 	}
 	else $is_fav=0;
-	if($res=$conn->query("SELECT count(*) as entry from word_cloud WHERE `tag`='".$tag."';")){
+	if($res=$conn->query("SELECT count(*) as entry from word_cloud WHERE `tag`='".$tag."' and user_id= ".$_SESSION['user_id'].";")){
 		$row=$res->fetch_assoc();
 		if($row["entry"]=='0'){
 			if(!$conn->query("INSERT INTO word_cloud(tag,date_time,source_location,user_id,is_fav) VALUES('".$tag."','".date("Y-m-d H:i:s")."','".$table."','".$_SESSION["user_id"]."','".$is_fav."');")){
 				echo "Failed to insert";
 			}
 		}else{
-			if(!$conn->query("UPDATE word_cloud set date_time='".date("Y-m-d H:i:s")."',source_location='".$table."',is_fav=".$is_fav." WHERE tag='".$tag."';")){
+			if(!$conn->query("UPDATE word_cloud set date_time='".date("Y-m-d H:i:s")."',source_location='".$table."',is_fav=".$is_fav." WHERE tag='".$tag."' and user_id= ".$_SESSION['user_id'].";")){
 				echo "Failed to update";
 			}
 		}
@@ -38,7 +38,7 @@ function insertTable($table,$tag){
 if(isset($_GET['hashtag']))
 {
 	
-	$sql="SELECT * from word_cloud WHERE `tag`='".$_GET['hashtag']."';";
+	$sql="SELECT * from word_cloud WHERE `tag`='".$_GET['hashtag']."' and user_id= ".$_SESSION['user_id'].";";
 	$res=$conn->query($sql);
 	while($row = $res->fetch_assoc())
 	{
@@ -140,7 +140,7 @@ if(isset($_GET['hashtag']))
 							<li><a ><i class="fa fa-history"></i> Previous Hashtags <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu" style="display: none">
                                         <?php
-											$sql="SELECT tag from hashtags LIMIT 10;";
+											$sql="SELECT tag from hashtags where user_id= ".$_SESSION['user_id']." LIMIT 10;";
 											$res=$conn->query($sql);
 												while($row = $res->fetch_assoc())
 												{
@@ -153,7 +153,7 @@ if(isset($_GET['hashtag']))
 							<li><a><i class="fa fa-star"></i> Favourite   <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu" style="display: none">
                                         <?php
-											$sql="SELECT tag from hashtags where is_fav=1;";
+											$sql="SELECT tag from hashtags where is_fav=1 and user_id= ".$_SESSION['user_id'].";";
 											$res=$conn->query($sql);
 												while($row = $res->fetch_assoc())
 												{
@@ -173,7 +173,7 @@ if(isset($_GET['hashtag']))
                                 <li><a><i class="fa fa-history"></i> Word Cloud searches <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu" style="display: none">
                                         <?php
-											$sql="SELECT tag from word_cloud LIMIT 10;";
+											$sql="SELECT tag from word_cloud where user_id= ".$_SESSION['user_id']." LIMIT 10;";
 											$res=$conn->query($sql);
 												while($row = $res->fetch_assoc())
 												{
@@ -186,7 +186,7 @@ if(isset($_GET['hashtag']))
 								<li><a><i class="fa fa-star"></i> Favourite   <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu" style="display: none">
                                         <?php
-											$sql="SELECT tag from word_cloud where is_fav=1;";
+											$sql="SELECT tag from word_cloud where is_fav=1 and user_id= ".$_SESSION['user_id'].";";
 											$res=$conn->query($sql);
 												while($row = $res->fetch_assoc())
 												{
