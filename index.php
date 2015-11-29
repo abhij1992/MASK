@@ -107,8 +107,13 @@ if(isset($_POST['submit2'])){
         <div id="wrapper">
             <div id="login" class="animate form">
                 <section class="login_content">
+				<div>
+                                <h1></i> Project MASK</h1>
+
+                                <h2>Market Analysis based on Social Network</h2>
+                            </div>
                     <form method="POST">
-                        <h1>Login Form</h1>
+                        <h1>Login</h1>
                         <div>
                             <input type="text" class="form-control" placeholder="Username" name="uname" required/>
                         </div>
@@ -129,11 +134,7 @@ if(isset($_POST['submit2'])){
                             </p>
                             <div class="clearfix"></div>
                             <br />
-                            <div>
-                                <h1></i> Project MASK</h1>
-
-                                <h2>Market Analysis based on Social Network</h2>
-                            </div>
+                            
                         </div>
                     </form>
                     <!-- form -->

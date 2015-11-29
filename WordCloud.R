@@ -8,7 +8,7 @@ setup_twitter_oauth(consumer_key = consumer_key,consumer_secret = consumer_secre
 args <- commandArgs(TRUE)
 keyword <- args[1]
 
-tweets <- searchTwitter(keyword, n=500, lang="en")
+tweets <- searchTwitter(keyword, n=200, lang="en")
 Tweets.text = lapply(tweets,function(t)t$getText())
 
 #install.packages (c ( "tm", "wordcloud"))
