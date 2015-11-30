@@ -18,8 +18,8 @@ if(isset($_POST['brand1']) && isset($_POST['brand2']))
 {
 	$brand1=$_POST['brand1'];
 	$brand2=$_POST['brand2'];
-	$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe brand.R $brand1 $brand2");//supply path to your Rscript.exe file
-	//$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe brand.R $brand1 $brand2");//supply path to your Rscript.exe file
+	//$output = shell_exec("E:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe brand.R $brand1 $brand2");//supply path to your Rscript.exe file
+	$output = shell_exec("C:\PROGRA~1\R\R-3.2.2\bin\\rscript.exe brand.R $brand1 $brand2");//supply path to your Rscript.exe file
 	//echo "Result contains ";
     //echo "<pre>$output</pre>";	
 	$table=get_string_between($output,"brand1-start","brand1-end");
